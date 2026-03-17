@@ -1,0 +1,18 @@
+{
+  "name": "modelscope-skills",
+  "owner": {
+    "name": "hyf020908"
+  },
+  "metadata": {
+    "description": "Community-maintained agent skills for AI/ML tasks on ModelScope workflows, including datasets, training, evaluation, and paper publishing.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "modelscope-skills",
+      "source": ".",
+      "skills": "skills",
+      "description": "Community-maintained agent skills for AI/ML tasks on ModelScope workflows, including datasets, training, evaluation, and paper publishing."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>modelscope-jobs</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 2rem; color: #1f2937; }
+      h1 { margin-bottom: 0.5rem; }
+      code { background: #f3f4f6; padding: 0.15rem 0.35rem; border-radius: 4px; }
+      pre { background: #111827; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+      .muted { color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <h1>modelscope-jobs</h1>
+    <p class="muted">Reusable workflow scripts for data generation, evaluation, and artifact publishing on ModelScope Hub.</p>
+
+    <h2>Quick Start</h2>
+    <pre><code>export MODELSCOPE_API_TOKEN=&lt;token&gt;
+uv run scripts/generate-responses.py \
+  --source-dataset your-org/prompts \
+  --output-dataset your-org/generated \
+  --model Qwen/Qwen2.5-7B-Instruct</code></pre>
+
+    <h2>References</h2>
+    <ul>
+      <li><code>references/hardware_guide.md</code></li>
+      <li><code>references/hub_saving.md</code></li>
+      <li><code>references/token_usage.md</code></li>
+      <li><code>references/troubleshooting.md</code></li>
+    </ul>
+  </body>
+</html>

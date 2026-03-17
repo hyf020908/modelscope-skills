@@ -1,0 +1,21 @@
+{
+  "name": "modelscope-skills",
+  "description": "Community-maintained agent skills for AI/ML tasks on ModelScope workflows, including datasets, training, evaluation, and paper publishing.",
+  "version": "1.0.1",
+  "author": {
+    "name": "hyf020908"
+  },
+  "homepage": "https://github.com/hyf020908/modelscope-skills",
+  "repository": "https://github.com/hyf020908/modelscope-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "modelscope",
+    "machine-learning",
+    "datasets",
+    "training",
+    "evaluation",
+    "papers",
+    "fine-tuning",
+    "llm"
+  ]
+}

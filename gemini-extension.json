@@ -1,0 +1,14 @@
+{
+  "name": "modelscope-skills",
+  "description": "Provides access to the ModelScope Skills community project.",
+  "version": "0.1.0",
+  "contextFileName": "agents/AGENTS.md",
+  "mcpServers": {
+    "modelscope-mcp": {
+      "command": "uvx",
+      "args": [
+        "modelscope-mcp-server"
+      ]
+    }
+  }
+}

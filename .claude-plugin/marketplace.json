@@ -1,0 +1,90 @@
+{
+  "name": "modelscope-skills",
+  "owner": {
+    "name": "hyf020908"
+  },
+  "metadata": {
+    "description": "Community-maintained agent skills for dataset engineering, model training, evaluation, tracking, and automation across ModelScope workflows.",
+    "version": "1.0.1"
+  },
+  "plugins": [
+    {
+      "name": "modelscope-model-trainer",
+      "source": "./skills/modelscope-model-trainer",
+      "skills": "./",
+      "description": "Train and align language models with ms-swift and publish checkpoints to ModelScope Hub."
+    },
+    {
+      "name": "modelscope-paper-publisher",
+      "source": "./skills/modelscope-paper-publisher",
+      "skills": "./",
+      "description": "Draft and publish model-related research summaries to ModelScope repositories."
+    },
+    {
+      "name": "modelscope-datasets",
+      "source": "./skills/modelscope-datasets",
+      "skills": "./",
+      "description": "Create, curate, and publish datasets on ModelScope Hub with template-driven validation and SQL-based analysis."
+    },
+    {
+      "name": "modelscope-evaluation",
+      "source": "./skills/modelscope-evaluation",
+      "skills": "./",
+      "description": "Manage benchmark results for ModelScope model repositories, including README extraction, score normalization, and metadata publishing."
+    },
+    {
+      "name": "modelscope-tool-builder",
+      "source": "./skills/modelscope-tool-builder",
+      "skills": "./",
+      "description": "Build reusable automation scripts for ModelScope Hub API workflows."
+    },
+    {
+      "name": "modelscope-cli",
+      "source": "./skills/modelscope-cli",
+      "skills": "./",
+      "description": "Use the official modelscope CLI for ModelScope Hub authentication, repository creation, download, and upload workflows."
+    },
+    {
+      "name": "modelscope-mcp",
+      "source": "./skills/modelscope-mcp",
+      "skills": "./",
+      "description": "Configure and use the official ModelScope MCP server for model search, dataset discovery, and repository metadata workflows."
+    },
+    {
+      "name": "modelscope-jobs",
+      "source": "./skills/modelscope-jobs",
+      "skills": "./",
+      "description": "Execute reproducible ML workflows and publish outputs to ModelScope repositories using UV scripts and token-authenticated uploads."
+    },
+    {
+      "name": "modelscope-tracking",
+      "source": "./skills/modelscope-tracking",
+      "skills": "./",
+      "description": "Track experiments with local run manifests, metric logs, artifact catalogs, and summary exports for ModelScope workflows."
+    },
+    {
+      "name": "modelscope-dataset-explorer",
+      "source": "./skills/modelscope-dataset-explorer",
+      "skills": "./",
+      "description": "Explore ModelScope datasets using Hub metadata APIs, local snapshot downloads, and SQL analysis with DuckDB."
+    },
+    {
+      "name": "gradio",
+      "source": "./skills/modelscope-gradio",
+      "skills": "./",
+      "description": "Build Gradio web UIs and demos in Python. Use when creating or editing Gradio apps, components, event listeners, layouts, or chatbots."
+    },
+    {
+      "name": "transformers-js",
+      "source": "./skills/transformers.js",
+      "skills": "./",
+      "description": "Build JavaScript and TypeScript inference workflows with Transformers.js, using ModelScope-hosted assets through local downloads."
+    },
+    {
+      "name": "modelscope-vision-trainer",
+      "source": "./skills/modelscope-vision-trainer",
+      "skills": "./",
+      "description": "Train and fine-tune vision models with reproducible data pipelines and publish checkpoints to ModelScope Hub."
+    }
+  ]
+}
