@@ -1,6 +1,6 @@
 # Local Training on macOS
 
-- Prefer small models and short context windows.
-- Use MPS backend where supported.
-- Focus on data validation and prompt-template iteration locally.
-- Run large training jobs on Linux GPU machines.
+- Treat macOS as control plane by default.
+- Use local only for data inspection, config generation, packaging, and remote job submission.
+- Prefer remote PAI DLC for actual training.
+- If budget is tight or GPU quota is unavailable, start with CPU pilot remotely.

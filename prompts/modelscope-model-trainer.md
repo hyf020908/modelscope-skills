@@ -1,30 +1,57 @@
 $modelscope-model-trainer
 
 You are running inside local codex-cli.
-Treat the local machine as a control plane only.
-Automatically prepare training assets and submit the actual language-model training workflow to a remote Alibaba Cloud PAI / ModelScope-related cloud environment instead of training on the local machine.
+Treat the local machine as control plane only.
+All heavy model training must run remotely in Alibaba Cloud PAI / ModelScope environments.
 
-Hard requirements:
+Hard requirements (must follow):
 1. Never run heavy ms-swift training directly on local macOS.
-2. Local work is limited to scanning files, generating configs, packaging assets, calling CLI/API tools, submitting remote jobs, polling status, and collecting outputs.
-3. Actual training must run remotely, preferably on PAI DLC; reuse DSW if it is already available and appropriate.
-4. Do not stop because data, configs, or scripts are missing. Generate the minimum viable assets and continue.
-5. Do not ask unnecessary questions. Choose the most likely path and keep going.
-6. Default to SFT unless the workspace clearly contains preference-pair data for DPO.
-7. Publish the best checkpoint to ModelScope Hub when possible.
-8. If remote credentials or workspace access are missing, prepare all generated files and exact next-step commands before stopping.
+2. Local actions are limited to: scan files, generate configs/assets, package assets, call SDK/CLI/API, submit remote jobs, poll status, collect outputs.
+3. Prefer PAI DLC for remote training. Reuse DSW only when already available and clearly suitable.
+4. If data/config/scripts are missing, auto-generate minimum viable assets and continue. Do not stop early.
+5. Do not ask unnecessary questions; choose the most likely successful path and proceed.
+6. Default to SFT unless workspace clearly contains preference-pair schema for DPO (`chosen/rejected` or equivalent).
+7. Try to publish best checkpoint to ModelScope Hub when token is available.
+8. If credentials/workspace access are missing, still prepare all files and exact next-step commands before stopping.
+9. Keep all tool-calling/process narration in Chinese when reporting progress.
 
-Please do the following:
-A. Detect available Alibaba Cloud / PAI / ModelScope credentials, workspace info, region, and CLI/API tools.
-B. Scan the workspace and reuse any existing data, configs, or scripts.
-C. If no data exists, create a minimal instruction dataset with train/valid splits.
-D. Generate a lightweight ms-swift training plan using LoRA or QLoRA.
-E. Package the assets for remote execution.
-F. Submit a pilot run remotely, fix one common failure automatically if needed, then continue.
-G. Submit or upgrade to the full training run.
-H. Monitor job status, identify the best checkpoint, and publish outputs to ModelScope Hub.
+Execution policy for higher first-pass success:
+1. Use low-cost safe defaults first:
+   - `PAI_DLC_GPU=0`
+   - `PAI_DLC_CPU=4`
+   - `PAI_DLC_MEMORY=16Gi`
+   - `PAI_DLC_IMAGE=pytorch/pytorch:latest` (or region-verified available image)
+2. For CPU or unknown GPU capability, force precision-safe args:
+   - `--bf16 false --fp16 false --torch_dtype float32`
+3. Always run pilot before full run.
+4. Ensure remote startup command is short and deterministic.
+   - Do not embed large base64 payloads in one `user_command`.
+   - Ensure command explicitly executes `swift sft`/`swift dpo` etc, not only `pip install`.
+5. Keep pilot lightweight (`LoRA/QLoRA`, small `max_steps`) then upgrade to full run.
 
-Output only:
+Failure auto-fix matrix (apply automatically once, then continue):
+1. `resourceLimit` / GPU quota exceeded:
+   - Switch to CPU route (`GPU=0, CPU=4, MEMORY=16Gi`) and resubmit.
+2. `ValueError: Your setup doesn't support bf16/gpu`:
+   - Force `--bf16 false --fp16 false --torch_dtype float32`, then resubmit.
+3. `enterRunningTimeout` / EnvPreparing timeout / image pull issues:
+   - Switch to verified image and resubmit.
+4. Pod exits after dependency install with no training logs:
+   - Shorten startup command and ensure explicit training entrypoint execution.
+5. Polling/network transient errors on local control plane:
+   - Continue polling/retry status fetch; do not classify as training failure unless remote terminal status is `Failed/Stopped/Timeout`.
+
+Mandatory steps:
+A. Detect available Alibaba Cloud / PAI / ModelScope credentials, workspace, region, and CLI/API tools.
+B. Scan workspace and reuse existing data/config/scripts.
+C. If no data, create minimal instruction dataset (`train.jsonl`, `valid.jsonl`).
+D. Generate lightweight ms-swift plan (LoRA/QLoRA; default SFT).
+E. Prepare/package remote execution assets.
+F. Submit pilot remotely; if failed, auto-fix one matched common failure and continue.
+G. Submit/upgrade to full training run.
+H. Monitor status, extract best checkpoint, and publish to ModelScope Hub when possible.
+
+Output only (strict 9 items):
 1. Training route used
 2. Files generated
 3. Remote environment used

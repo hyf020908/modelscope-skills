@@ -5,6 +5,8 @@ modelscope create your-name/your-model --repo_type model --visibility public
 modelscope upload your-name/your-model ./outputs checkpoints --repo-type model
 ```
 
+If `MODELSCOPE_API_TOKEN` is not configured, treat publishing as `skipped` and keep training as successful.
+
 Python upload example:
 
 ```python
