@@ -10,6 +10,7 @@ Hard requirements:
 4. Keep claims grounded in the local project artifacts.
 5. Do not fabricate results that are not supported by files in the workspace.
 6. Produce publishable markdown and repository-ready documentation.
+7. Choose the closest built-in template instead of inventing a structure from scratch when possible.
 
 Please do the following:
 A. Scan the workspace for experiment results, model metadata, notes, and evaluation outputs.

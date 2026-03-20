@@ -5,24 +5,37 @@ description: Explore ModelScope datasets using Hub metadata APIs, local snapshot
 
 # ModelScope Dataset Explorer
 
-Use this skill when users need to inspect dataset structure, sample rows, or run ad-hoc analysis before training or evaluation.
+Use this skill when the main task is understanding an existing dataset before training, evaluation, cleaning, or publication.
 
-## Workflow
+## Operating Mode
+
+- Start with metadata and lightweight inspection before downloading large artifacts.
+- Download only the smallest useful subset when a local snapshot is needed.
+- Prefer structured findings over generic dataset summaries.
+- Keep all exploration outputs inside the current project so downstream steps stay reproducible.
+
+## What This Skill Covers
+
+- Hub metadata discovery.
+- Split, schema, modality, and file-format inspection.
+- Lightweight sample preview and quality checks.
+- Local SQL profiling with DuckDB after selective download.
+- Recommendations for dataset selection or cleanup.
+
+## Standard Workflow
 
 1. Inspect dataset metadata from ModelScope Hub.
-2. Download required files or split subsets to local workspace.
-3. Run SQL or pandas exploration on local parquet/json/csv files.
-4. Summarize quality issues and recommended transformations.
+2. Identify likely data files and split layout.
+3. Download only the required subset when local inspection is necessary.
+4. Run SQL or file-based profiling on parquet/json/jsonl/csv files.
+5. Summarize schema, data quality, and downstream suitability.
 
 ## Metadata Discovery
-
-Use Python for reliable discovery:
 
 ```python
 from modelscope.hub.api import HubApi
 
 api = HubApi()
-# owner_or_group can be a username or organization
 result = api.list_datasets(owner_or_group="AI-ModelScope", page_number=1, page_size=20)
 print(result)
 ```
@@ -30,10 +43,7 @@ print(result)
 ## Snapshot Download
 
 ```bash
-# Full dataset snapshot
 modelscope download --dataset your-org/your-dataset --local_dir ./data/your-dataset
-
-# Selective download by pattern
 modelscope download --dataset your-org/your-dataset --include "*.parquet" --local_dir ./data/your-dataset
 ```
 
@@ -52,7 +62,7 @@ print(local_dir)
 duckdb -c "SELECT count(*) FROM read_parquet('./data/your-dataset/**/*.parquet');"
 ```
 
-Use this pattern for lightweight profiling:
+Typical profiling query:
 
 ```sql
 SELECT
@@ -62,27 +72,29 @@ SELECT
 FROM read_parquet('./data/your-dataset/**/*.parquet');
 ```
 
-## Publishing Curated Data Back To Hub
+## AI Execution Contract
 
-```bash
-# Create dataset repository once
-modelscope create your-name/cleaned-dataset --repo_type dataset --visibility public
+When using this skill, the agent should:
 
-# Upload processed files
-modelscope upload your-name/cleaned-dataset ./outputs data --repo-type dataset
-```
+1. Infer the most likely relevant dataset if the user does not provide one.
+2. Confirm schema, split names, file formats, and representative samples.
+3. Highlight concrete risks such as missing fields, split imbalance, duplicated rows, or license ambiguity.
+4. Recommend the best immediate dataset choice for the current project.
+5. Save a concise inspection report if the task is part of a larger workflow.
 
 ## Output Expectations
 
 Provide:
 
-- Dataset schema summary (columns and inferred types).
-- Split statistics and missing-value profile.
-- At least 3 representative samples.
-- Concrete transformation recommendations for downstream training.
+- Dataset identifiers inspected.
+- Schema summary with inferred column roles.
+- Split statistics and file-format layout.
+- At least 3 representative samples when data access is available.
+- Concrete transformation or filtering recommendations.
 
 ## Guardrails
 
 - Do not assume a public remote SQL endpoint exists.
-- Do not expose private data in logs or markdown snippets.
+- Do not expose private or sensitive rows in logs or markdown.
 - Keep downloaded data inside project-scoped directories.
+- Avoid downloading full snapshots when metadata or a filtered subset is enough.

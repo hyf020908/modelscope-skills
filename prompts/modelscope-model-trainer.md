@@ -14,6 +14,8 @@ Hard requirements (must follow):
 7. Try to publish best checkpoint to ModelScope Hub when token is available.
 8. If credentials/workspace access are missing, still prepare all files and exact next-step commands before stopping.
 9. Keep all tool-calling/process narration in Chinese when reporting progress.
+10. If local datasets, configs, or helper scripts are needed remotely, package them through `REMOTE_ASSET_PATHS` and a ModelScope dataset repo before submission.
+11. Do not assume PAI containers can read files from the local workspace unless you explicitly upload or download them.
 
 Execution policy for higher first-pass success:
 1. Use low-cost safe defaults first:
@@ -28,6 +30,7 @@ Execution policy for higher first-pass success:
    - Do not embed large base64 payloads in one `user_command`.
    - Ensure command explicitly executes `swift sft`/`swift dpo` etc, not only `pip install`.
 5. Keep pilot lightweight (`LoRA/QLoRA`, small `max_steps`) then upgrade to full run.
+6. Prefer the included `scripts/submit_pai_dlc.py` path over ad hoc API calls.
 
 Failure auto-fix matrix (apply automatically once, then continue):
 1. `resourceLimit` / GPU quota exceeded:
@@ -46,10 +49,10 @@ A. Detect available Alibaba Cloud / PAI / ModelScope credentials, workspace, reg
 B. Scan workspace and reuse existing data/config/scripts.
 C. If no data, create minimal instruction dataset (`train.jsonl`, `valid.jsonl`).
 D. Generate lightweight ms-swift plan (LoRA/QLoRA; default SFT).
-E. Prepare/package remote execution assets.
+E. Prepare and upload remote execution assets when local files are required remotely.
 F. Submit pilot remotely; if failed, auto-fix one matched common failure and continue.
-G. Submit/upgrade to full training run.
-H. Monitor status, extract best checkpoint, and publish to ModelScope Hub when possible.
+G. Submit or upgrade to the full training run.
+H. Monitor status and publish the resulting checkpoint to ModelScope Hub when possible.
 
 Output only (strict 9 items):
 1. Training route used

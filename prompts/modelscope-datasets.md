@@ -11,6 +11,7 @@ Hard requirements:
 5. Generate all missing files needed for a usable dataset repository.
 6. Keep the dataset small and practical if the project is empty.
 7. Publish to ModelScope Hub if credentials allow; otherwise prepare everything for immediate publish.
+8. Choose the closest supported template and normalize toward it instead of inventing a brand-new schema when avoidable.
 
 Please do the following:
 A. Scan the workspace for existing data files and infer the intended dataset type.

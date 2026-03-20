@@ -7,15 +7,24 @@ description: Build JavaScript/TypeScript inference workflows with Transformers.j
 
 Use this skill when users need browser or Node.js inference and want to source model artifacts from ModelScope repositories.
 
+## Operating Mode
+
+- Prefer a minimal runnable JS or TS project over framework-heavy scaffolding.
+- Download model assets explicitly so local paths are deterministic.
+- Reuse the existing frontend or Node project structure when present.
+- Keep install, run, and asset-loading steps visible to the user and to downstream agents.
+
 ## Important Note
 
 Transformers.js is distributed as the npm package `@huggingface/transformers`. The package name is upstream-defined and must remain unchanged.
 
-## Workflow
+## Standard Workflow
 
-1. Download model files from ModelScope to local directory.
-2. Load model/tokenizer from local path in Transformers.js.
-3. Run inference in Node.js or browser.
+1. Decide whether the project should run in Node.js, the browser, or both.
+2. Download the required model files from ModelScope.
+3. Load tokenizer and model from a local path.
+4. Add a minimal example input/output flow.
+5. Leave concise install and run instructions.
 
 ## Install
 
@@ -35,14 +44,23 @@ console.log(out);
 
 ## Model Preparation
 
-Use `modelscope download` to collect assets first:
+Use `modelscope download` first:
 
 ```bash
 modelscope download --model your-org/your-model --local_dir ./models/qwen-local
 ```
 
+## AI Execution Contract
+
+When using this skill, the agent should:
+
+1. Infer the smallest useful JS or TS runtime shape for the task.
+2. Keep asset paths explicit and local.
+3. Add lightweight validation and error handling.
+4. Keep the project runnable without requiring hidden manual steps.
+
 ## Guardrails
 
 - Prefer local model paths for deterministic deployments.
-- Pin package version in production apps.
-- Cache model artifacts between runs.
+- Pin package versions in production code.
+- Cache model artifacts between runs when possible.

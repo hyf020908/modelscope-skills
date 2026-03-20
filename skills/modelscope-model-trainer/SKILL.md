@@ -26,6 +26,7 @@ Use this skill when users need practical language-model training on ModelScope w
 
 - `scripts/train_sft_example.py`
 - `scripts/bootstrap_remote_assets.py`
+- `scripts/submit_pai_dlc.py`
 - `scripts/diagnose_dlc_report.py`
 - `scripts/train_dpo_example.py`
 - `scripts/train_grpo_example.py`
@@ -36,17 +37,35 @@ Use this skill when users need practical language-model training on ModelScope w
 
 ## One-Shot Workflow
 
-1. Detect credentials/tools/region/workspace (`AK/SK`, `PAI_REGION`, `MODELSCOPE_API_TOKEN`).
-2. Scan workspace for existing datasets/config/scripts; reuse them.
-3. If no data, create minimal instruction dataset (`train/valid`).
-4. Select method:
+1. Detect credentials/tools/region/workspace (`AK/SK`, `PAI_REGION`, `PAI_WORKSPACE_ID`, `MODELSCOPE_API_TOKEN`).
+2. Before any real remote submission, generate a user-editable config document at `configs/pai.required.env` when the four required PAI fields are missing or unconfirmed:
+   - `ALIBABA_CLOUD_ACCESS_KEY_ID=`
+   - `ALIBABA_CLOUD_ACCESS_KEY_SECRET=`
+   - `PAI_REGION=`
+   - `PAI_WORKSPACE_ID=`
+3. After generating `configs/pai.required.env`, explicitly tell the user to fill those four fields and then reply with exactly `continue`.
+4. Scan workspace for existing datasets/config/scripts; reuse them.
+5. If no data, create minimal instruction dataset (`train/valid`).
+6. Package any local data or config needed remotely through `REMOTE_ASSET_PATHS` and a ModelScope dataset repo.
+7. Select method:
    - Default `SFT`.
    - Use `DPO` only when preference-pair schema is present (`chosen/rejected` or equivalent).
-5. Build lightweight pilot config first (`LoRA` / `QLoRA`).
-6. Submit pilot job remotely to PAI DLC.
-7. Auto-fix one common failure and resubmit automatically.
-8. Submit/upgrade to full run.
-9. Track status, extract best checkpoint, publish to ModelScope Hub when token is available.
+8. Build lightweight pilot config first (`LoRA` / `QLoRA`).
+9. Submit pilot job remotely to PAI DLC.
+10. Apply one common high-confidence fix when failure diagnostics match.
+11. Submit/upgrade to full run.
+12. Track status and publish checkpoints to ModelScope Hub when token is available.
+
+## Credential Gate
+
+The remote submission workflow must pause once per workspace until the user has provided the four required PAI fields. The expected interaction is:
+
+1. Create `configs/pai.required.env` with blank placeholders for the four required keys.
+2. Tell the user to fill that file.
+3. Tell the user to reply `continue` after filling it.
+4. Resume the remote packaging and submission workflow only after the user continues.
+
+`MODELSCOPE_API_TOKEN` is still recommended for remote asset upload and ModelScope publication, but it is not part of the mandatory four-field pause gate.
 
 ## Default Resource Policy (Low-Cost First)
 
@@ -62,7 +81,7 @@ Use this skill when users need practical language-model training on ModelScope w
 
 - Keep remote `user_command` short and deterministic.
 - Do not embed large base64 payloads into a single command string.
-- Prefer small inline datasets/configs for pilot, or mount assets/object storage.
+- Prefer a remote asset repo plus `modelscope download` when local files are required remotely.
 - Ensure command includes actual training execution (`swift sft/...`), not only dependency installation.
 
 ## Quick Bootstrap
@@ -120,6 +139,16 @@ modelscope upload your-name/qwen2p5-sft ./outputs/sft checkpoints --repo-type mo
 ```
 
 If token is missing, mark publication as skipped instead of failing training result.
+
+## Remote Asset Rule
+
+When the training dataset or config only exists locally, do not assume PAI can see it. Upload those paths first through:
+
+- `REMOTE_ASSET_PATHS`
+- `REMOTE_ASSET_REPO` or `MS_REPO_OWNER` + `MS_REPO_BASE`
+- `MODELSCOPE_API_TOKEN`
+
+The submission helper will upload those assets to a ModelScope dataset repo and the remote command will download them into `./remote_assets`.
 
 ## Quality Rules
 

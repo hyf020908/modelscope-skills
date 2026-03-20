@@ -11,6 +11,7 @@ Hard requirements:
 5. Use structured inspection where possible, including schema checks, split discovery, and sample previews.
 6. Surface actionable findings rather than generic descriptions.
 7. Keep everything reproducible inside the current workspace.
+8. If multiple plausible datasets exist, compare them and recommend one instead of listing them passively.
 
 Please do the following:
 A. Detect whether the current project already references a ModelScope dataset.

@@ -10,6 +10,7 @@ Hard requirements:
 4. Keep asset handling explicit and reproducible.
 5. Support local development with clear install and run steps.
 6. Do not stop because the workspace is empty.
+7. Keep model loading explicit and honest: if assets must be downloaded first, add that step instead of implying remote magic.
 
 Please do the following:
 A. Detect whether this project should be browser-based, Node-based, or both.

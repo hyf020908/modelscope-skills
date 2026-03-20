@@ -12,6 +12,7 @@ Hard requirements:
 6. Keep local operations lightweight and reproducible.
 7. If authentication is missing, detect it clearly and prepare all remaining steps anyway.
 8. At the end, leave the workspace in a usable, publishable state.
+9. Prefer explicit repository paths and commit intent over ambiguous default uploads.
 
 Please do the following:
 A. Detect whether ModelScope CLI is installed and whether authentication is already configured.

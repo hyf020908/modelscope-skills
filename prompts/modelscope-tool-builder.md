@@ -10,6 +10,7 @@ Hard requirements:
 4. Reuse official ModelScope APIs or CLI behavior where appropriate.
 5. Keep the tool easy to run from the current workspace.
 6. Do not stop because the repository is incomplete; scaffold the minimum viable tool and continue.
+7. Prefer structured output such as JSON when the tool is likely to be chained by other agents or scripts.
 
 Please do the following:
 A. Inspect the workspace and identify the most useful automation opportunity.

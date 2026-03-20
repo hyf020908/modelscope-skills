@@ -86,6 +86,10 @@ def main() -> None:
     pilot_content = env_block(
         {
             "MODEL_ID": args.model_id,
+            "TRAINER_METHOD": "sft",
+            "TRAIN_DATASET": "./remote_assets/data/train.jsonl",
+            "VALID_DATASET": "./remote_assets/data/valid.jsonl",
+            "OUTPUT_DIR": "./outputs/pilot-sft",
             "TRAIN_TYPE": "lora",
             "MAX_LENGTH": "256",
             "BATCH_SIZE": "1",
@@ -104,6 +108,10 @@ def main() -> None:
     full_content = env_block(
         {
             "MODEL_ID": args.model_id,
+            "TRAINER_METHOD": "sft",
+            "TRAIN_DATASET": "./remote_assets/data/train.jsonl",
+            "VALID_DATASET": "./remote_assets/data/valid.jsonl",
+            "OUTPUT_DIR": "./outputs/full-sft",
             "TRAIN_TYPE": "lora",
             "MAX_LENGTH": "512",
             "BATCH_SIZE": "1",
@@ -128,6 +136,9 @@ def main() -> None:
             "PAI_WORKSPACE_ID": "",
             "PAI_DLC_IMAGE": "pytorch/pytorch:latest",
             "PAI_DLC_ECS_SPEC": "",
+            "PAI_DLC_JOB_TYPE": "PyTorchJob",
+            "PAI_DLC_ROLE_TYPE": "Worker",
+            "PAI_DLC_POD_COUNT": "1",
             "PAI_DLC_GPU": "0",
             "PAI_DLC_CPU": "4",
             "PAI_DLC_MEMORY": "16Gi",
@@ -135,6 +146,9 @@ def main() -> None:
             "MODELSCOPE_API_TOKEN": "",
             "MS_REPO_OWNER": "",
             "MS_REPO_BASE": "qwen2p5-1p5b-sft",
+            "REMOTE_ASSET_REPO": "",
+            "REMOTE_ASSET_PATHS": "data",
+            "REMOTE_BOOTSTRAP_COMMAND": "python -m pip install -U pip setuptools wheel && python -m pip install -U \"modelscope>=1.16.0\" \"ms-swift\"",
         }
     )
 

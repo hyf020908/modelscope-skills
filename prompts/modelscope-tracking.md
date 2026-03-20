@@ -10,6 +10,7 @@ Hard requirements:
 4. Normalize run names, timestamps, metrics, and artifact references.
 5. Keep tracking lightweight and file-based unless the workspace already uses something else.
 6. Produce summaries that are easy to publish or compare later.
+7. Prefer stable metric names and concise machine-readable summaries.
 
 Please do the following:
 A. Scan the workspace for experiment outputs, configs, checkpoints, and metrics.

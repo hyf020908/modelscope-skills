@@ -11,6 +11,7 @@ Hard requirements:
 5. Keep the app runnable locally with clear structure and sensible defaults.
 6. Do not stop because the current workspace is incomplete.
 7. Focus on usability: inputs, outputs, examples, and error handling.
+8. Keep the demo honest: clearly separate real model inference from placeholder logic.
 
 Please do the following:
 A. Inspect the workspace and infer the most likely demo type.

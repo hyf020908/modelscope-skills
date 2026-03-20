@@ -10,6 +10,7 @@ Hard requirements:
 4. Reuse MODELSCOPE token settings if already present.
 5. Do not stop just because MCP is missing at the start.
 6. Keep the setup simple, explicit, and reproducible.
+7. Verify tool availability before attempting any MCP call.
 
 Please do the following:
 A. Check whether ModelScope MCP is already configured in this workspace or user environment.

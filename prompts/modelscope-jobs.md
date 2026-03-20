@@ -11,15 +11,19 @@ Hard requirements:
 4. Prefer UV-based reproducible execution where suitable.
 5. Publish resulting artifacts to ModelScope Hub when credentials allow.
 6. If remote execution is blocked, still prepare the complete job package and submission commands.
+7. Prefer PAI DLC for heavy execution and treat the local machine as the orchestration plane only.
+8. When remote execution needs local scripts or local inputs, upload them first through `REMOTE_ASSET_PATHS` and a ModelScope dataset repo before submitting.
+9. Keep all process narration and progress updates in Chinese.
 
 Please do the following:
 A. Scan the workspace and infer the intended workflow.
 B. Organize code, configs, inputs, and outputs into a reproducible job structure.
 C. Generate missing scripts and job entrypoints as needed.
 D. Prepare the workflow for execution with sensible defaults.
-E. Run the lightweight parts locally only if necessary for validation.
-F. Publish outputs or prepare them for ModelScope upload.
-G. Save a job manifest and execution summary.
+E. Run only lightweight validation locally when necessary.
+F. Submit the real workload to PAI DLC when it is non-trivial.
+G. Publish outputs or prepare them for ModelScope upload.
+H. Save a job manifest and execution summary.
 
 Output only:
 1. Job type inferred

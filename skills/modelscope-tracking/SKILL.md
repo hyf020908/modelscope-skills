@@ -5,7 +5,14 @@ description: Track experiments with local run manifests, metric logs, artifact c
 
 # ModelScope Tracking
 
-Use this skill when users need structured experiment and evaluation tracking that stays reproducible, scriptable, and easy to publish.
+Use this skill when users need structured experiment or evaluation tracking that stays local, reproducible, scriptable, and easy to publish.
+
+## Operating Mode
+
+- Keep tracking file-based unless the project already uses another tracker.
+- Record lifecycle, metrics, and artifacts separately.
+- Make summaries easy to compare across runs and easy to upload later.
+- Prefer append-only logs plus stable manifests over opaque binary state.
 
 ## Scope
 
@@ -14,9 +21,9 @@ This skill provides project-local tracking for:
 - Run lifecycle metadata (`create-run`, `complete-run`)
 - Metric logging (`metrics.jsonl`)
 - Artifact registration (`artifacts.jsonl`)
-- Run indexing and summaries (table/JSON/Markdown/CSV)
+- Run indexing and summaries (table, JSON, Markdown, CSV)
 
-It is designed for ModelScope-oriented workflows where runs are produced by training, evaluation, and batch inference scripts, then exported and uploaded to ModelScope repositories.
+It is designed for ModelScope workflows where training, evaluation, or batch jobs produce outputs that may later be published to Hub repos.
 
 ## Primary CLI
 
