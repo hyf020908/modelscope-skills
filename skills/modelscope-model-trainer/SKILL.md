@@ -1,164 +1,116 @@
 ---
 name: modelscope-model-trainer
-description: One-shot remote-first ms-swift trainer for Alibaba Cloud PAI DLC + ModelScope Hub, with automatic fallback and failure recovery.
+description: Turn plain-language language-model training requests into ms-swift configs, PAI DLC jobs, and ModelScope publications with sensible defaults.
 ---
 
 # ModelScope Model Trainer
 
-Use this skill when users need practical language-model training on ModelScope with minimal retries.
+Use this skill for language-model SFT, DPO, or GRPO when the user describes the job in natural language instead of handing over finished config files.
 
-## Operating Mode (Default)
+## Request Style
 
-- Remote-first: treat local machine as control plane only.
-- Never run heavy ms-swift training on local macOS.
-- Local actions are limited to scanning files, generating assets/config, submitting jobs, polling, and collecting outputs.
-- Preferred runtime is PAI DLC. Reuse DSW only when it is already provisioned and clearly more suitable.
-- If assets are missing, generate minimum viable assets and continue.
+- Accept requests such as:
+  - `Use Qwen/Qwen2.5-7B-Instruct on my dataset for SFT.`
+  - `我想用 Qwen2.5 做 DPO，对齐数据在 ./data/prefs.jsonl，学习率 2e-5。`
+- Infer missing fields instead of asking for a template.
+- Default policy:
+  - Method: `SFT`
+  - Model: `Qwen/Qwen2.5-0.5B-Instruct`
+  - Train type: `LoRA`
+  - Dataset: generate a small local dataset under `data/<method>/` when the user does not provide one
+  - Remote path: PAI DLC pilot first, then full run
 
-## Stack
+## Files You Must Create
 
-- `ms-swift` for training and evaluation orchestration.
-- `modelscope` SDK/CLI for repository and artifact operations.
-- `alibabacloud-pai-dlc20201203` SDK for remote DLC submission and polling.
-- Optional `llama.cpp` conversion step for GGUF export.
+Run `scripts/training_workspace.py` with the user's exact request text. That script must create:
 
-## Included Scripts
+1. `configs/training.plan.json`
+2. `configs/remote.auto.env`
+3. `configs/pilot.env`
+4. `configs/full.env`
+5. `configs/pai.required.env` when the four required PAI fields are still missing
 
-- `scripts/train_sft_example.py`
-- `scripts/bootstrap_remote_assets.py`
-- `scripts/submit_pai_dlc.py`
-- `scripts/diagnose_dlc_report.py`
-- `scripts/train_dpo_example.py`
-- `scripts/train_grpo_example.py`
-- `scripts/unsloth_sft_example.py`
-- `scripts/convert_to_gguf.py`
-- `scripts/dataset_inspector.py`
-- `scripts/estimate_cost.py`
-
-## One-Shot Workflow
-
-1. Detect credentials/tools/region/workspace (`AK/SK`, `PAI_REGION`, `PAI_WORKSPACE_ID`, `MODELSCOPE_API_TOKEN`).
-2. Before any real remote submission, generate a user-editable config document at `configs/pai.required.env` when the four required PAI fields are missing or unconfirmed:
-   - `ALIBABA_CLOUD_ACCESS_KEY_ID=`
-   - `ALIBABA_CLOUD_ACCESS_KEY_SECRET=`
-   - `PAI_REGION=`
-   - `PAI_WORKSPACE_ID=`
-3. After generating `configs/pai.required.env`, explicitly tell the user to fill those four fields and then reply with exactly `continue`.
-4. Scan workspace for existing datasets/config/scripts; reuse them.
-5. If no data, create minimal instruction dataset (`train/valid`).
-6. Package any local data or config needed remotely through `REMOTE_ASSET_PATHS` and a ModelScope dataset repo.
-7. Select method:
-   - Default `SFT`.
-   - Use `DPO` only when preference-pair schema is present (`chosen/rejected` or equivalent).
-8. Build lightweight pilot config first (`LoRA` / `QLoRA`).
-9. Submit pilot job remotely to PAI DLC.
-10. Apply one common high-confidence fix when failure diagnostics match.
-11. Submit/upgrade to full run.
-12. Track status and publish checkpoints to ModelScope Hub when token is available.
+The compatibility entrypoint `scripts/bootstrap_remote_assets.py` now wraps the same workflow.
 
 ## Credential Gate
 
-The remote submission workflow must pause once per workspace until the user has provided the four required PAI fields. The expected interaction is:
+Before the first real PAI DLC submission, check whether these four values are already available:
 
-1. Create `configs/pai.required.env` with blank placeholders for the four required keys.
+- `ALIBABA_CLOUD_ACCESS_KEY_ID`
+- `ALIBABA_CLOUD_ACCESS_KEY_SECRET`
+- `PAI_REGION`
+- `PAI_WORKSPACE_ID`
+
+If any are missing:
+
+1. Create `configs/pai.required.env` with blank placeholders.
 2. Tell the user to fill that file.
-3. Tell the user to reply `continue` after filling it.
-4. Resume the remote packaging and submission workflow only after the user continues.
+3. Tell the user to reply with exactly `continue`.
+4. Stop before real submission.
 
-`MODELSCOPE_API_TOKEN` is still recommended for remote asset upload and ModelScope publication, but it is not part of the mandatory four-field pause gate.
+Do not skip this pause.
 
-## Default Resource Policy (Low-Cost First)
+`MODELSCOPE_API_TOKEN` is still optional for the gate itself, but it is required later for remote asset upload or automatic publication.
 
-- Start with CPU route when budget/quotas are uncertain:
-  - `PAI_DLC_GPU=0`
-  - `PAI_DLC_CPU=4`
-  - `PAI_DLC_MEMORY=16Gi`
-- If GPU is used, avoid `bf16` unless the instance definitely supports it.
-- For CPU or unknown GPU capability, force:
-  - `--bf16 false --fp16 false --torch_dtype float32`
+## Primary Scripts
 
-## Command Construction Rules
+- `scripts/training_workspace.py`
+  Natural-language request to config files.
+- `scripts/submit_pai_dlc.py`
+  Remote submission and polling.
+- `scripts/train_sft_example.py`
+- `scripts/train_dpo_example.py`
+- `scripts/train_grpo_example.py`
+- `scripts/dataset_inspector.py`
+- `scripts/estimate_cost.py`
+- `scripts/diagnose_dlc_report.py`
+- `scripts/convert_to_gguf.py`
 
+## Workflow
+
+1. Read the user request and infer method, model, dataset, and training parameters.
+2. Run `scripts/training_workspace.py --request "<user text>"`.
+3. Inspect the generated plan and env files.
+4. If `configs/pai.required.env` was created, stop and wait for `continue`.
+5. Run a pilot job first:
+   - `uv run scripts/submit_pai_dlc.py --env-file configs/remote.auto.env --mode pilot --wait --retry-once`
+6. Only after a successful pilot, run the full job:
+   - `uv run scripts/submit_pai_dlc.py --env-file configs/remote.auto.env --mode full --wait`
+7. Publish checkpoints to ModelScope when token and target repo are available.
+
+## Method Rules
+
+- Use `SFT` by default.
+- Use `DPO` only when the user explicitly asks for it or the data clearly represents preference pairs.
+- Use `GRPO` only when the user explicitly asks for reinforcement-style optimization or reward-based training.
+- When method choice is ambiguous, prefer `SFT`.
+
+The generated default datasets follow ms-swift-friendly schemas:
+
+- `SFT`: chat `messages`
+- `DPO`: `messages` plus `rejected_response`
+- `GRPO`: `messages` plus `solution`
+
+## Command Rules
+
+- `SFT` uses `swift sft`.
+- `DPO` and `GRPO` use `swift rlhf --rlhf_type dpo|grpo`.
 - Keep remote `user_command` short and deterministic.
-- Do not embed large base64 payloads into a single command string.
-- Prefer a remote asset repo plus `modelscope download` when local files are required remotely.
-- Ensure command includes actual training execution (`swift sft/...`), not only dependency installation.
+- Use `REMOTE_ASSET_PATHS` when local files must be visible inside PAI DLC.
+- Never pretend a local path is available remotely without packaging or upload.
 
-## Quick Bootstrap
+## Defaults And References
 
-```bash
-# 1) Prepare minimal remote-ready assets in current workspace
-uv run modelscope-model-trainer/scripts/bootstrap_remote_assets.py --root .
-
-# 2) Submit pilot (control plane local, training remote)
-.venv/bin/python scripts/submit_pai_dlc.py \
-  --env-file configs/remote.auto.env \
-  --mode pilot \
-  --wait \
-  --retry-once
-
-# 3) Submit full run
-.venv/bin/python scripts/submit_pai_dlc.py \
-  --env-file configs/remote.auto.env \
-  --mode full \
-  --wait
-```
-
-## Failure Auto-Recovery Matrix
-
-- `resourceLimit` / GPU quota exceeded:
-  - Switch to CPU: `GPU=0, CPU=4, MEMORY=16Gi`.
-- `bf16` unsupported:
-  - Add/force `--bf16 false --fp16 false --torch_dtype float32`.
-- `enterRunningTimeout` / image pull failures:
-  - Use verified image (`pytorch/pytorch:latest` or region-validated mirror).
-- Pod exits after pip install with no training logs:
-  - Shorten command; ensure explicit `swift sft` execution step.
-- transient polling/proxy errors:
-  - Continue polling; do not treat as terminal unless remote status is failed/stopped.
-
-## Standard Output Contract
-
-Always return only these 9 items when asked for run result:
-
-1. Training route used
-2. Files generated
-3. Remote environment used
-4. Job ID / workspace / region
-5. Pilot result
-6. Full training result
-7. Best checkpoint path
-8. Hub publication result
-9. Single blocking issue if interrupted
-
-## Publishing
-
-```bash
-modelscope create your-name/qwen2p5-sft --repo_type model --visibility public
-modelscope upload your-name/qwen2p5-sft ./outputs/sft checkpoints --repo-type model
-```
-
-If token is missing, mark publication as skipped instead of failing training result.
-
-## Remote Asset Rule
-
-When the training dataset or config only exists locally, do not assume PAI can see it. Upload those paths first through:
-
-- `REMOTE_ASSET_PATHS`
-- `REMOTE_ASSET_REPO` or `MS_REPO_OWNER` + `MS_REPO_BASE`
-- `MODELSCOPE_API_TOKEN`
-
-The submission helper will upload those assets to a ModelScope dataset repo and the remote command will download them into `./remote_assets`.
-
-## Quality Rules
-
-- Always run a small pilot before full training.
-- Save config + seed + git SHA for reproducibility.
-- Keep train/validation leakage checks explicit.
-- Record metric trends per checkpoint.
+- Low-risk defaults live in `scripts/training_workspace.py`.
+- Read `references/training_methods.md` when method choice is uncertain.
+- Read `references/troubleshooting.md` when a remote job fails.
+- Read `references/pai_dlc_remote_one_shot.md` for remote submission details.
+- Read `references/gguf_conversion.md` only when export is requested.
 
 ## Guardrails
 
-- Do not claim unsupported hardware assumptions.
-- Do not skip dataset validation.
-- Do not overwrite production model repos without explicit user approval.
+- Never force the user into a rigid prompt template.
+- Never skip the credential gate.
+- Never claim training has started if you only wrote config files.
+- Never overwrite an existing publish target without explicit approval.
+- Always keep a pilot stage before a costly full run unless the user explicitly asks to skip it.

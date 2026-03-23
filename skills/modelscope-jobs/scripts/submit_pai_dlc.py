@@ -16,7 +16,7 @@ submission path. It supports two execution patterns:
 
 1. Provide `USER_COMMAND` directly in env files.
 2. Provide ms-swift-style training variables and let the script build a
-   `swift sft/dpo/grpo` command automatically.
+   `swift sft` or `swift rlhf --rlhf_type ...` command automatically.
 
 If a remote job needs local files, set `REMOTE_ASSET_PATHS` and the script will
 upload those paths to a temporary or user-chosen ModelScope dataset repo before
@@ -210,38 +210,63 @@ def build_swift_train_command(env: dict[str, str]) -> str:
         raise ValueError("Missing TRAIN_DATASET/DATASET for swift command generation")
 
     output_dir = env.get("OUTPUT_DIR", f"./outputs/{method}").strip()
-    cmd = [
-        "swift",
-        method,
-        "--model",
-        quote(model_id),
-        "--dataset",
-        quote(dataset),
-        "--output_dir",
-        quote(output_dir),
-    ]
-
     if method == "sft":
-        train_type = env.get("TRAIN_TYPE", "lora").strip()
+        cmd = [
+            "swift",
+            "sft",
+            "--model",
+            quote(model_id),
+            "--dataset",
+            quote(dataset),
+            "--output_dir",
+            quote(output_dir),
+        ]
+    else:
+        cmd = [
+            "swift",
+            "rlhf",
+            "--rlhf_type",
+            method,
+            "--model",
+            quote(model_id),
+            "--dataset",
+            quote(dataset),
+            "--output_dir",
+            quote(output_dir),
+        ]
+
+    train_type = env.get("TRAIN_TYPE", "lora").strip()
+    if train_type:
         cmd.extend(["--train_type", quote(train_type)])
-        if train_type in {"lora", "qlora"} and env.get("LORA_RANK", "").strip():
-            cmd.extend(["--lora_rank", env["LORA_RANK"].strip()])
-        if env.get("MAX_LENGTH", "").strip():
-            cmd.extend(["--max_length", env["MAX_LENGTH"].strip()])
-        if env.get("BATCH_SIZE", "").strip():
-            cmd.extend(["--per_device_train_batch_size", env["BATCH_SIZE"].strip()])
-        if env.get("GRAD_ACC", "").strip():
-            cmd.extend(["--gradient_accumulation_steps", env["GRAD_ACC"].strip()])
-        if env.get("LEARNING_RATE", "").strip():
-            cmd.extend(["--learning_rate", env["LEARNING_RATE"].strip()])
-        if env.get("EPOCHS", "").strip():
-            cmd.extend(["--num_train_epochs", env["EPOCHS"].strip()])
-        if env.get("MAX_STEPS", "").strip():
-            cmd.extend(["--max_steps", env["MAX_STEPS"].strip()])
-        if env.get("SAVE_STEPS", "").strip():
-            cmd.extend(["--save_steps", env["SAVE_STEPS"].strip()])
-        if env.get("EVAL_STEPS", "").strip():
-            cmd.extend(["--eval_steps", env["EVAL_STEPS"].strip()])
+    if train_type in {"lora", "qlora"} and env.get("LORA_RANK", "").strip():
+        cmd.extend(["--lora_rank", env["LORA_RANK"].strip()])
+    if env.get("MAX_LENGTH", "").strip():
+        cmd.extend(["--max_length", env["MAX_LENGTH"].strip()])
+    if env.get("BATCH_SIZE", "").strip():
+        cmd.extend(["--per_device_train_batch_size", env["BATCH_SIZE"].strip()])
+    if env.get("GRAD_ACC", "").strip():
+        cmd.extend(["--gradient_accumulation_steps", env["GRAD_ACC"].strip()])
+    if env.get("LEARNING_RATE", "").strip():
+        cmd.extend(["--learning_rate", env["LEARNING_RATE"].strip()])
+    if env.get("EPOCHS", "").strip():
+        cmd.extend(["--num_train_epochs", env["EPOCHS"].strip()])
+    if env.get("MAX_STEPS", "").strip():
+        cmd.extend(["--max_steps", env["MAX_STEPS"].strip()])
+    if env.get("SAVE_STEPS", "").strip():
+        cmd.extend(["--save_steps", env["SAVE_STEPS"].strip()])
+    if env.get("EVAL_STEPS", "").strip():
+        cmd.extend(["--eval_steps", env["EVAL_STEPS"].strip()])
+    if env.get("LOGGING_STEPS", "").strip():
+        cmd.extend(["--logging_steps", env["LOGGING_STEPS"].strip()])
+    if env.get("SYSTEM_PROMPT", "").strip():
+        cmd.extend(["--system", quote(env["SYSTEM_PROMPT"].strip())])
+    if method == "dpo":
+        if env.get("BETA", "").strip():
+            cmd.extend(["--beta", env["BETA"].strip()])
+        if env.get("LOSS_TYPE", "").strip():
+            cmd.extend(["--loss_type", quote(env["LOSS_TYPE"].strip())])
+    if method == "grpo" and env.get("USE_VLLM", "").strip():
+        cmd.extend(["--use_vllm", quote(env["USE_VLLM"].strip())])
 
     val_dataset = env.get("VALID_DATASET", env.get("VAL_DATASET", "")).strip()
     if val_dataset:

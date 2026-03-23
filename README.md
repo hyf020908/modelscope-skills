@@ -2,6 +2,8 @@
 
 ModelScope Skills is an independent community project with reusable agent skills for dataset engineering, model training, evaluation, tracking, reporting, and workflow automation for ModelScope workflows.
 
+The repository is natural-language-first: after a skill is copied into Codex, Gemini CLI, Claude Code, or another agent runtime, the user should be able to describe the task directly instead of filling a rigid prompt template.
+
 The repository follows the open Agent Skills format: each skill is a self-contained directory with a `SKILL.md` entrypoint plus scripts, references, and templates.
 
 ## Installation
@@ -62,19 +64,19 @@ export MODELSCOPE_API_TOKEN="<your-token>"
 <!-- BEGIN_SKILLS_TABLE -->
 | Name | Description | Documentation |
 |------|-------------|---------------|
-| `gradio` | Build Gradio web UIs and demos in Python. Use when creating or editing Gradio apps, components, event listeners, layouts, or chatbots. | [SKILL.md](skills/modelscope-gradio/SKILL.md) |
-| `modelscope-cli` | Use the official modelscope CLI for ModelScope Hub authentication, repository creation, download, and upload workflows. | [SKILL.md](skills/modelscope-cli/SKILL.md) |
-| `modelscope-dataset-explorer` | Explore ModelScope datasets using Hub metadata APIs, local snapshot downloads, and SQL analysis with DuckDB. | [SKILL.md](skills/modelscope-dataset-explorer/SKILL.md) |
-| `modelscope-datasets` | Create, curate, and publish datasets on ModelScope Hub with template-driven validation and SQL-based analysis. | [SKILL.md](skills/modelscope-datasets/SKILL.md) |
-| `modelscope-evaluation` | Manage benchmark results for ModelScope model repositories, including README extraction, score normalization, and metadata publishing. | [SKILL.md](skills/modelscope-evaluation/SKILL.md) |
-| `modelscope-jobs` | Execute reproducible ML workflows and publish outputs to ModelScope repositories using UV scripts and token-authenticated uploads. | [SKILL.md](skills/modelscope-jobs/SKILL.md) |
-| `modelscope-mcp` | Configure and use the official ModelScope MCP server for model search, dataset discovery, and repository metadata workflows. | [SKILL.md](skills/modelscope-mcp/SKILL.md) |
-| `modelscope-model-trainer` | Train and align language models with ms-swift and publish checkpoints to ModelScope Hub. | [SKILL.md](skills/modelscope-model-trainer/SKILL.md) |
-| `modelscope-paper-publisher` | Draft and publish model-related research summaries to ModelScope repositories. | [SKILL.md](skills/modelscope-paper-publisher/SKILL.md) |
-| `modelscope-tool-builder` | Build reusable automation scripts for ModelScope Hub API workflows. | [SKILL.md](skills/modelscope-tool-builder/SKILL.md) |
-| `modelscope-tracking` | Track experiments with local run manifests, metric logs, artifact catalogs, and summary exports for ModelScope workflows. | [SKILL.md](skills/modelscope-tracking/SKILL.md) |
-| `modelscope-vision-trainer` | Train and fine-tune vision models with reproducible data pipelines and publish checkpoints to ModelScope Hub. | [SKILL.md](skills/modelscope-vision-trainer/SKILL.md) |
-| `transformers-js` | Build JavaScript and TypeScript inference workflows with Transformers.js, using ModelScope-hosted assets through local downloads. | [SKILL.md](skills/transformers.js/SKILL.md) |
+| `gradio` | Build or edit Gradio apps from plain-language UI requests, choosing the simplest valid Gradio pattern for the job. | [SKILL.md](skills/modelscope-gradio/SKILL.md) |
+| `modelscope-cli` | Execute ModelScope Hub login, create, download, and upload tasks from plain-language requests with the official CLI. | [SKILL.md](skills/modelscope-cli/SKILL.md) |
+| `modelscope-dataset-explorer` | Explore ModelScope datasets from plain-language inspection requests using metadata lookup, selective download, and local profiling. | [SKILL.md](skills/modelscope-dataset-explorer/SKILL.md) |
+| `modelscope-datasets` | Build, clean, validate, and publish ModelScope datasets from plain-language instructions with automatic template selection. | [SKILL.md](skills/modelscope-datasets/SKILL.md) |
+| `modelscope-evaluation` | Turn plain-language evaluation requests into benchmark extraction, remote evaluation jobs, and publishable result artifacts. | [SKILL.md](skills/modelscope-evaluation/SKILL.md) |
+| `modelscope-jobs` | Execute plain-language batch-job requests as reproducible local or PAI DLC workflows and publish the outputs to ModelScope. | [SKILL.md](skills/modelscope-jobs/SKILL.md) |
+| `modelscope-mcp` | Configure the official ModelScope MCP server from plain-language setup requests and use it for tool-based Hub discovery. | [SKILL.md](skills/modelscope-mcp/SKILL.md) |
+| `modelscope-model-trainer` | Turn plain-language language-model training requests into ms-swift configs, PAI DLC jobs, and ModelScope publications with sensible defaults. | [SKILL.md](skills/modelscope-model-trainer/SKILL.md) |
+| `modelscope-paper-publisher` | Turn plain-language publication requests into evidence-backed Markdown reports for ModelScope repositories. | [SKILL.md](skills/modelscope-paper-publisher/SKILL.md) |
+| `modelscope-tool-builder` | Convert plain-language ModelScope automation needs into reusable scripts with stable flags, structured output, and official API usage. | [SKILL.md](skills/modelscope-tool-builder/SKILL.md) |
+| `modelscope-tracking` | Add local, file-based experiment tracking to ModelScope workflows from plain-language requests. | [SKILL.md](skills/modelscope-tracking/SKILL.md) |
+| `modelscope-vision-trainer` | Turn plain-language vision fine-tuning requests into task plans, config files, and PAI-ready submission assets. | [SKILL.md](skills/modelscope-vision-trainer/SKILL.md) |
+| `transformers-js` | Build browser or Node.js inference workflows from plain-language requests using Transformers.js and locally downloaded model assets. | [SKILL.md](skills/transformers.js/SKILL.md) |
 <!-- END_SKILLS_TABLE -->
 
 ## Development

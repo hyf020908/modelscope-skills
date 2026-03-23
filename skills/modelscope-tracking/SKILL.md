@@ -1,72 +1,30 @@
 ---
 name: modelscope-tracking
-description: Track experiments with local run manifests, metric logs, artifact catalogs, and summary exports for ModelScope workflows.
+description: Add local, file-based experiment tracking to ModelScope workflows from plain-language requests.
 ---
 
 # ModelScope Tracking
 
-Use this skill when users need structured experiment or evaluation tracking that stays local, reproducible, scriptable, and easy to publish.
+Use this skill when the user wants experiment tracking that stays local, transparent, and easy to publish later.
 
-## Operating Mode
+## Request Style
 
-- Keep tracking file-based unless the project already uses another tracker.
-- Record lifecycle, metrics, and artifacts separately.
-- Make summaries easy to compare across runs and easy to upload later.
-- Prefer append-only logs plus stable manifests over opaque binary state.
+- Accept requests such as:
+  - `Track this SFT run.`
+  - `把最近几次实验整理成可比较的报告。`
+- If tracking is not initialized, initialize it automatically in the current project.
 
-## Scope
-
-This skill provides project-local tracking for:
-
-- Run lifecycle metadata (`create-run`, `complete-run`)
-- Metric logging (`metrics.jsonl`)
-- Artifact registration (`artifacts.jsonl`)
-- Run indexing and summaries (table, JSON, Markdown, CSV)
-
-It is designed for ModelScope workflows where training, evaluation, or batch jobs produce outputs that may later be published to Hub repos.
-
-## Primary CLI
+## Primary Script
 
 - `scripts/run_tracker.py`
 
-## Standard Workflow
+## Workflow
 
-```bash
-# 1) Initialize workspace
-uv run scripts/run_tracker.py init --project qwen-sft --owner ml-team
-
-# 2) Create run
-RUN_ID=$(uv run scripts/run_tracker.py create-run \
-  --model-id Qwen/Qwen2.5-7B-Instruct \
-  --dataset-id your-org/sft-data \
-  --task sft \
-  --tags "baseline,fp16")
-
-# 3) Log metrics during execution
-uv run scripts/run_tracker.py log-metric --run-id "$RUN_ID" --name train_loss --value 1.23 --step 1
-uv run scripts/run_tracker.py log-metric --run-id "$RUN_ID" --name eval_accuracy --value 0.71 --step 100 --split validation
-
-# 4) Register produced artifacts
-uv run scripts/run_tracker.py add-artifact --run-id "$RUN_ID" --path ./outputs/checkpoint-100 --kind checkpoint
-
-# 5) Complete run and save summary
-uv run scripts/run_tracker.py complete-run \
-  --run-id "$RUN_ID" \
-  --status succeeded \
-  --summary-json '{"best_eval_accuracy":0.71,"notes":"baseline config"}'
-
-# 6) Export reports
-uv run scripts/run_tracker.py summarize --format markdown --output .modelscope-tracking/reports/summary.md
-uv run scripts/run_tracker.py export-metrics-csv --run-id "$RUN_ID" --output .modelscope-tracking/reports/${RUN_ID}.csv
-```
-
-## ModelScope Integration Pattern
-
-After generating tracking reports, publish them to ModelScope using standard Hub workflows:
-
-```bash
-modelscope upload your-org/your-model .modelscope-tracking/reports reports --repo-type model
-```
+1. Initialize `.modelscope-tracking/` when missing.
+2. Create or reuse a run id.
+3. Log metrics and artifacts as files, not opaque state.
+4. Summarize runs into Markdown, JSON, or CSV.
+5. Publish reports later with ordinary ModelScope upload workflows.
 
 ## Directory Layout
 
@@ -74,10 +32,6 @@ modelscope upload your-org/your-model .modelscope-tracking/reports reports --rep
 .modelscope-tracking/
   project.json
   runs/
-    <run-id>/
-      run.json
-      metrics.jsonl
-      artifacts.jsonl
   artifacts/
   reports/
 ```
@@ -85,12 +39,11 @@ modelscope upload your-org/your-model .modelscope-tracking/reports reports --rep
 ## References
 
 - `references/logging_metrics.md`
-- `references/alerts.md`
 - `references/retrieving_metrics.md`
+- `references/alerts.md`
 
 ## Guardrails
 
-- Use stable metric names across runs (`train_loss`, `eval_accuracy`, `latency_ms`).
-- Keep `summary-json` concise and machine-readable.
-- Register artifact paths explicitly so downstream automation can discover outputs.
-- Do not store secrets in run manifests.
+- Never store secrets in tracking files.
+- Keep metric names stable across runs.
+- Prefer append-only logs over in-place mutation.

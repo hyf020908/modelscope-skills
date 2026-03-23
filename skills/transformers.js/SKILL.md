@@ -1,66 +1,43 @@
 ---
 name: transformers-js
-description: Build JavaScript/TypeScript inference workflows with Transformers.js, using ModelScope-hosted assets through local downloads.
+description: Build browser or Node.js inference workflows from plain-language requests using Transformers.js and locally downloaded model assets.
 ---
 
-# Transformers.js for ModelScope Workflows
+# Transformers.js For ModelScope Workflows
 
-Use this skill when users need browser or Node.js inference and want to source model artifacts from ModelScope repositories.
+Use this skill when the user wants JS or TS inference and describes the behavior in natural language.
 
-## Operating Mode
+## Request Style
 
-- Prefer a minimal runnable JS or TS project over framework-heavy scaffolding.
-- Download model assets explicitly so local paths are deterministic.
-- Reuse the existing frontend or Node project structure when present.
-- Keep install, run, and asset-loading steps visible to the user and to downstream agents.
+- Accept requests such as:
+  - `Make a small Node.js text-classification demo.`
+  - `做一个浏览器端摘要页面，模型文件先下载到本地。`
 
-## Important Note
+## Workflow
 
-Transformers.js is distributed as the npm package `@huggingface/transformers`. The package name is upstream-defined and must remain unchanged.
+1. Decide whether the runtime is browser, Node.js, or both.
+2. Download model assets explicitly to a local folder.
+3. Load them with `@huggingface/transformers`.
+4. Leave the project runnable with clear install and run commands.
 
-## Standard Workflow
+## Rules
 
-1. Decide whether the project should run in Node.js, the browser, or both.
-2. Download the required model files from ModelScope.
-3. Load tokenizer and model from a local path.
-4. Add a minimal example input/output flow.
-5. Leave concise install and run instructions.
+- Keep local model paths explicit.
+- Prefer the smallest runnable example over framework-heavy scaffolding.
+- Pin versions when editing production code.
 
-## Install
+## References
 
-```bash
-npm install @huggingface/transformers
-```
+- `references/EXAMPLES.md`
+- `references/TEXT_GENERATION.md`
+- `references/PIPELINE_OPTIONS.md`
+- `references/CONFIGURATION.md`
+- `references/CACHE.md`
 
-## Local Model Loading Example
-
-```ts
-import { pipeline } from '@huggingface/transformers';
-
-const classifier = await pipeline('text-classification', './models/qwen-local');
-const out = await classifier('ModelScope integration with Transformers.js');
-console.log(out);
-```
-
-## Model Preparation
-
-Use `modelscope download` first:
-
-```bash
-modelscope download --model your-org/your-model --local_dir ./models/qwen-local
-```
-
-## AI Execution Contract
-
-When using this skill, the agent should:
-
-1. Infer the smallest useful JS or TS runtime shape for the task.
-2. Keep asset paths explicit and local.
-3. Add lightweight validation and error handling.
-4. Keep the project runnable without requiring hidden manual steps.
+Load only what the current task needs.
 
 ## Guardrails
 
-- Prefer local model paths for deterministic deployments.
-- Pin package versions in production code.
-- Cache model artifacts between runs when possible.
+- Never hide where model artifacts come from.
+- Never assume browser-only code will run in Node.js or the reverse.
+- Keep asset caching deterministic.

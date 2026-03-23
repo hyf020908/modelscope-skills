@@ -1,27 +1,27 @@
 ---
 name: modelscope-tool-builder
-description: Build reusable automation scripts for ModelScope Hub API workflows.
+description: Convert plain-language ModelScope automation needs into reusable scripts with stable flags, structured output, and official API usage.
 ---
 
 # ModelScope Tool Builder
 
-Use this skill when a repetitive ModelScope workflow should become a reusable script or small utility instead of a one-off shell command.
+Use this skill when the user keeps repeating a ModelScope workflow and it should become a reusable script.
 
-## Operating Mode
+## Request Style
 
-- Build tools with explicit inputs, outputs, and failure modes.
-- Prefer official ModelScope CLI or SDK behavior over scraping or undocumented endpoints.
-- Keep tools composable so they can be used by agents, CI, or local operators.
-- Emit structured output whenever possible.
+- Accept requests like:
+  - `Make me a tool that syncs model cards in batch.`
+  - `把这个 Hub 数据收集流程做成可复用脚本。`
 
-## What To Build
+## Workflow
 
-- Data collection tools for models or datasets.
-- Metadata normalization and enrichment pipelines.
-- Reporting scripts.
-- Upload, sync, or export utilities for curated artifacts.
+1. Identify the repeatable unit of work.
+2. Prefer official CLI or SDK behavior.
+3. Build one script with explicit flags and actionable errors.
+4. Emit structured output when downstream automation benefits from it.
+5. Validate the lightest meaningful path locally.
 
-## Reference Templates
+## References
 
 - `references/baseline_modelscope_api.py`
 - `references/baseline_modelscope_api.sh`
@@ -30,26 +30,8 @@ Use this skill when a repetitive ModelScope workflow should become a reusable sc
 - `references/modelscope_model_card_frontmatter.sh`
 - `references/modelscope_model_papers_auth.sh`
 
-## AI Execution Contract
+## Guardrails
 
-When using this skill, the agent should:
-
-1. Identify the repeatable part of the workflow.
-2. Turn it into a documented script with stable flags.
-3. Validate inputs early and emit actionable errors.
-4. Provide example usage and an output schema.
-5. Test the lightest meaningful path locally when possible.
-
-## Standards
-
-- Prefer explicit CLI flags over hardcoded constants.
-- Include idempotent behavior and clear exit codes.
-- Emit JSON output for downstream automation when appropriate.
-- Keep token handling external through environment variables.
-
-## Delivery Checklist
-
-- The script has `--help` and at least one usage example.
-- Output schema is documented or obvious from structured output.
-- Failure modes include actionable messages.
-- Network calls include timeout and retry behavior when relevant.
+- Never bake secrets into the script.
+- Never scrape undocumented endpoints when official interfaces exist.
+- Prefer one small reliable utility over a vague framework.

@@ -1,85 +1,93 @@
 ---
 name: modelscope-vision-trainer
-description: Train and fine-tune vision models with reproducible data pipelines and publish checkpoints to ModelScope Hub.
+description: Turn plain-language vision fine-tuning requests into task plans, config files, and PAI-ready submission assets.
 ---
 
 # ModelScope Vision Trainer
 
-Use this skill for image classification, object detection, and segmentation fine-tuning workflows.
+Use this skill for image classification, object detection, and segmentation training when the user explains the goal in natural language.
 
-## Operating Mode
+## Request Style
 
-- Local machine is the control plane only for inspection, packaging, config generation, and submission.
-- Heavy training should run remotely on PAI DLC.
-- The included scripts cover dataset inspection, cost estimation, and command generation.
-- If the actual training entrypoint is not already present in the workspace, the agent must scaffold it explicitly or stop at a remote-ready package instead of pretending training can run.
+- Accept requests such as:
+  - `Fine-tune a classifier on ./data/vision/train and ./data/vision/val.`
+  - `我想做目标检测，标注在 ./data/annotations/train.json 和 ./data/annotations/val.json。`
+- Infer missing fields where that is safe.
+- Default task: `classification`
+- Default behavior: inspect first, write configs next, submit remotely only when a runnable training entrypoint exists
+
+## Files You Must Create
+
+Run `scripts/prepare_training_workspace.py` with the user's request text. It writes:
+
+1. `configs/vision.training.json`
+2. `configs/remote.auto.env`
+3. `configs/pai.required.env` when the required PAI fields are missing
+
+These files are the source of truth for the rest of the workflow.
 
 ## Credential Gate
 
-Before any real PAI DLC submission, generate `configs/pai.required.env` if the required PAI fields are missing or not yet confirmed. The file must contain:
+Before the first real PAI DLC submission, require:
 
-```bash
-ALIBABA_CLOUD_ACCESS_KEY_ID=
-ALIBABA_CLOUD_ACCESS_KEY_SECRET=
-PAI_REGION=
-PAI_WORKSPACE_ID=
-```
+- `ALIBABA_CLOUD_ACCESS_KEY_ID`
+- `ALIBABA_CLOUD_ACCESS_KEY_SECRET`
+- `PAI_REGION`
+- `PAI_WORKSPACE_ID`
 
-After generating that file:
+If any are missing:
 
-1. Tell the user to fill the four fields.
-2. Tell the user to reply with exactly `continue`.
-3. Do not proceed to real remote submission until the user continues.
+1. Create `configs/pai.required.env`.
+2. Tell the user to fill it.
+3. Wait for `continue`.
 
-`MODELSCOPE_API_TOKEN` can still be requested later when remote asset upload or automatic publication is needed.
+## Primary Scripts
 
-## Scope
-
-- Dataset sanity checks such as label schema, class balance, and basic file integrity.
-- Training command generation for classification, detection, and segmentation.
-- Runtime sizing and cost estimation.
-- Remote submission to PAI DLC when a real training entrypoint is available.
-- Uploading checkpoints and reports to ModelScope repos.
-
-## Included Scripts
-
+- `scripts/prepare_training_workspace.py`
 - `scripts/dataset_inspector.py`
-- `scripts/estimate_cost.py`
 - `scripts/image_classification_training.py`
 - `scripts/object_detection_training.py`
 - `scripts/sam_segmentation_training.py`
+- `scripts/estimate_cost.py`
 - `scripts/submit_pai_dlc.py`
 
-## Recommended Flow
+The three task scripts output structured plans. They are not fake training commands anymore.
 
-1. Inspect the dataset first.
-2. Infer the vision task from file layout and annotations.
-3. Generate `configs/pai.required.env` and wait for `continue` if the four required PAI fields are not ready.
-4. Confirm that a runnable training entrypoint exists or scaffold one explicitly.
-5. Start with a pilot run before full training.
-6. Save best checkpoints and evaluation metrics.
-7. Publish artifacts to ModelScope model repo.
+## Workflow
 
-## Remote Submission Rule
+1. Infer the task from the request or dataset layout.
+2. Run `scripts/prepare_training_workspace.py --request "<user text>"`.
+3. Inspect local data with `scripts/dataset_inspector.py` when paths exist.
+4. If `configs/pai.required.env` exists, stop and wait for user input.
+5. If the workspace already contains a real training entrypoint, package it and submit to PAI DLC.
+6. If it does not, scaffold or request the entrypoint explicitly. Do not pretend the run is executable.
 
-When local scripts or configs are required inside PAI DLC, upload them first via:
+## Task Selection
 
-- `REMOTE_ASSET_PATHS`
-- `REMOTE_ASSET_REPO` or `MS_REPO_OWNER` + `MS_REPO_BASE`
-- `MODELSCOPE_API_TOKEN`
+- Classification keywords: `classification`, `分类`
+- Detection keywords: `detection`, `目标检测`
+- Segmentation keywords: `segmentation`, `segment`, `分割`, `sam`
+- When task is ambiguous, default to `classification`
 
-Then submit with `scripts/submit_pai_dlc.py`.
+## Remote Submission Rules
 
-## Publish Pattern
+- The local machine is the control plane only.
+- Use `REMOTE_ASSET_PATHS` when local scripts, configs, or data must be shipped to PAI DLC.
+- Keep the remote job honest: if a real training script is missing, the result is a remote-ready package, not a completed training run.
 
-```bash
-modelscope create your-name/vision-model --repo_type model --visibility public
-modelscope upload your-name/vision-model ./outputs checkpoints --repo-type model
-```
+## References
+
+- `references/reliability_principles.md`
+- `references/timm_trainer.md`
+- `references/object_detection_training_notebook.md`
+- `references/image_classification_training_notebook.md`
+- `references/finetune_sam2_trainer.md`
+
+Load only the task-specific reference you need.
 
 ## Guardrails
 
-- Do not skip label integrity checks.
-- Keep train/val/test splits disjoint.
-- Track both aggregate metrics and per-class metrics.
-- Do not claim built-in training support for a task unless an actual runnable entrypoint exists.
+- Never skip dataset sanity checks.
+- Never assume annotations are valid without inspection.
+- Never claim built-in end-to-end support for a task unless the runnable code exists.
+- Never bypass the PAI credential gate.

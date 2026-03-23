@@ -4,7 +4,7 @@
     "name": "hyf020908"
   },
   "metadata": {
-    "description": "Community-maintained agent skills for dataset engineering, model training, evaluation, tracking, and automation across ModelScope workflows.",
+    "description": "Natural-language-first agent skills for ModelScope data, training, evaluation, tracking, and automation workflows.",
     "version": "1.0.1"
   },
   "plugins": [
@@ -12,79 +12,79 @@
       "name": "modelscope-model-trainer",
       "source": "./skills/modelscope-model-trainer",
       "skills": "./",
-      "description": "Train and align language models with ms-swift and publish checkpoints to ModelScope Hub."
+      "description": "Turn plain-language language-model training requests into ms-swift configs, PAI DLC jobs, and ModelScope publications with sensible defaults."
     },
     {
       "name": "modelscope-paper-publisher",
       "source": "./skills/modelscope-paper-publisher",
       "skills": "./",
-      "description": "Draft and publish model-related research summaries to ModelScope repositories."
+      "description": "Turn plain-language publication requests into evidence-backed Markdown reports for ModelScope repositories."
     },
     {
       "name": "modelscope-datasets",
       "source": "./skills/modelscope-datasets",
       "skills": "./",
-      "description": "Create, curate, and publish datasets on ModelScope Hub with template-driven validation and SQL-based analysis."
+      "description": "Build, clean, validate, and publish ModelScope datasets from plain-language instructions with automatic template selection."
     },
     {
       "name": "modelscope-evaluation",
       "source": "./skills/modelscope-evaluation",
       "skills": "./",
-      "description": "Manage benchmark results for ModelScope model repositories, including README extraction, score normalization, and metadata publishing."
+      "description": "Turn plain-language evaluation requests into benchmark extraction, remote evaluation jobs, and publishable result artifacts."
     },
     {
       "name": "modelscope-tool-builder",
       "source": "./skills/modelscope-tool-builder",
       "skills": "./",
-      "description": "Build reusable automation scripts for ModelScope Hub API workflows."
+      "description": "Convert plain-language ModelScope automation needs into reusable scripts with stable flags, structured output, and official API usage."
     },
     {
       "name": "modelscope-cli",
       "source": "./skills/modelscope-cli",
       "skills": "./",
-      "description": "Use the official modelscope CLI for ModelScope Hub authentication, repository creation, download, and upload workflows."
+      "description": "Execute ModelScope Hub login, create, download, and upload tasks from plain-language requests with the official CLI."
     },
     {
       "name": "modelscope-mcp",
       "source": "./skills/modelscope-mcp",
       "skills": "./",
-      "description": "Configure and use the official ModelScope MCP server for model search, dataset discovery, and repository metadata workflows."
+      "description": "Configure the official ModelScope MCP server from plain-language setup requests and use it for tool-based Hub discovery."
     },
     {
       "name": "modelscope-jobs",
       "source": "./skills/modelscope-jobs",
       "skills": "./",
-      "description": "Execute reproducible ML workflows and publish outputs to ModelScope repositories using UV scripts and token-authenticated uploads."
+      "description": "Execute plain-language batch-job requests as reproducible local or PAI DLC workflows and publish the outputs to ModelScope."
     },
     {
       "name": "modelscope-tracking",
       "source": "./skills/modelscope-tracking",
       "skills": "./",
-      "description": "Track experiments with local run manifests, metric logs, artifact catalogs, and summary exports for ModelScope workflows."
+      "description": "Add local, file-based experiment tracking to ModelScope workflows from plain-language requests."
     },
     {
       "name": "modelscope-dataset-explorer",
       "source": "./skills/modelscope-dataset-explorer",
       "skills": "./",
-      "description": "Explore ModelScope datasets using Hub metadata APIs, local snapshot downloads, and SQL analysis with DuckDB."
+      "description": "Explore ModelScope datasets from plain-language inspection requests using metadata lookup, selective download, and local profiling."
     },
     {
       "name": "gradio",
       "source": "./skills/modelscope-gradio",
       "skills": "./",
-      "description": "Build Gradio web UIs and demos in Python. Use when creating or editing Gradio apps, components, event listeners, layouts, or chatbots."
+      "description": "Build or edit Gradio apps from plain-language UI requests, choosing the simplest valid Gradio pattern for the job."
     },
     {
       "name": "transformers-js",
       "source": "./skills/transformers.js",
       "skills": "./",
-      "description": "Build JavaScript and TypeScript inference workflows with Transformers.js, using ModelScope-hosted assets through local downloads."
+      "description": "Build browser or Node.js inference workflows from plain-language requests using Transformers.js and locally downloaded model assets."
     },
     {
       "name": "modelscope-vision-trainer",
       "source": "./skills/modelscope-vision-trainer",
       "skills": "./",
-      "description": "Train and fine-tune vision models with reproducible data pipelines and publish checkpoints to ModelScope Hub."
+      "description": "Turn plain-language vision fine-tuning requests into task plans, config files, and PAI-ready submission assets."
     }
   ]
 }

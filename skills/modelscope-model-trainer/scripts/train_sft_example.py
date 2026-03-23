@@ -27,7 +27,9 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=24)
     parser.add_argument("--save-steps", type=int, default=12)
     parser.add_argument("--eval-steps", type=int, default=12)
+    parser.add_argument("--logging-steps", type=int, default=5)
     parser.add_argument("--lora-rank", type=int, default=8)
+    parser.add_argument("--system", default="", help="Optional default system prompt")
     parser.add_argument(
         "--device-mode",
         choices=["cpu-safe", "gpu-auto"],
@@ -50,11 +52,14 @@ def main() -> None:
         f"--max_steps {args.max_steps}",
         f"--save_steps {args.save_steps}",
         f"--eval_steps {args.eval_steps}",
+        f"--logging_steps {args.logging_steps}",
     ]
     if args.train_type in {"lora", "qlora"}:
         cmd_parts.append(f"--lora_rank {args.lora_rank}")
     if args.val_dataset:
         cmd_parts.append(f"--val_dataset {shlex.quote(args.val_dataset)}")
+    if args.system:
+        cmd_parts.append(f"--system {shlex.quote(args.system)}")
     if args.device_mode == "cpu-safe":
         cmd_parts.extend(["--bf16 false", "--fp16 false", "--torch_dtype float32"])
     print(" ".join(cmd_parts))

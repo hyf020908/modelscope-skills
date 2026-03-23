@@ -21,19 +21,19 @@ IMPORTANT: You MUST read the SKILL.md file whenever the description of the skill
 
 <available_skills>
 
-gradio: `Build Gradio web UIs and demos in Python. Use when creating or editing Gradio apps, components, event listeners, layouts, or chatbots.`
-modelscope-cli: `Use the official `modelscope` CLI for ModelScope Hub authentication, repository creation, download, and upload workflows.`
-modelscope-dataset-explorer: `Explore ModelScope datasets using Hub metadata APIs, local snapshot downloads, and SQL analysis with DuckDB.`
-modelscope-datasets: `Create, curate, and publish datasets on ModelScope Hub with template-driven validation and SQL-based analysis.`
-modelscope-evaluation: `Manage benchmark results for ModelScope model repositories, including README extraction, score normalization, and metadata publishing.`
-modelscope-jobs: `Execute reproducible ML workflows and publish outputs to ModelScope repositories using UV scripts and token-authenticated uploads.`
-modelscope-mcp: `Configure and use the official ModelScope MCP server for model search, dataset discovery, and repository metadata workflows.`
-modelscope-model-trainer: `Train and align language models with ms-swift and publish checkpoints to ModelScope Hub.`
-modelscope-paper-publisher: `Draft and publish model-related research summaries to ModelScope repositories.`
-modelscope-tool-builder: `Build reusable automation scripts for ModelScope Hub API workflows.`
-modelscope-tracking: `Track experiments with local run manifests, metric logs, artifact catalogs, and summary exports for ModelScope workflows.`
-modelscope-vision-trainer: `Train and fine-tune vision models with reproducible data pipelines and publish checkpoints to ModelScope Hub.`
-transformers-js: `Build JavaScript/TypeScript inference workflows with Transformers.js, using ModelScope-hosted assets through local downloads.`
+gradio: `Build or edit Gradio apps from plain-language UI requests, choosing the simplest valid Gradio pattern for the job.`
+modelscope-cli: `Execute ModelScope Hub login, create, download, and upload tasks from plain-language requests with the official CLI.`
+modelscope-dataset-explorer: `Explore ModelScope datasets from plain-language inspection requests using metadata lookup, selective download, and local profiling.`
+modelscope-datasets: `Build, clean, validate, and publish ModelScope datasets from plain-language instructions with automatic template selection.`
+modelscope-evaluation: `Turn plain-language evaluation requests into benchmark extraction, remote evaluation jobs, and publishable result artifacts.`
+modelscope-jobs: `Execute plain-language batch-job requests as reproducible local or PAI DLC workflows and publish the outputs to ModelScope.`
+modelscope-mcp: `Configure the official ModelScope MCP server from plain-language setup requests and use it for tool-based Hub discovery.`
+modelscope-model-trainer: `Turn plain-language language-model training requests into ms-swift configs, PAI DLC jobs, and ModelScope publications with sensible defaults.`
+modelscope-paper-publisher: `Turn plain-language publication requests into evidence-backed Markdown reports for ModelScope repositories.`
+modelscope-tool-builder: `Convert plain-language ModelScope automation needs into reusable scripts with stable flags, structured output, and official API usage.`
+modelscope-tracking: `Add local, file-based experiment tracking to ModelScope workflows from plain-language requests.`
+modelscope-vision-trainer: `Turn plain-language vision fine-tuning requests into task plans, config files, and PAI-ready submission assets.`
+transformers-js: `Build browser or Node.js inference workflows from plain-language requests using Transformers.js and locally downloaded model assets.`
 </available_skills>
 
 Paths referenced within SKILL folders are relative to that SKILL. For example, `my-skill/scripts/example.py` is referenced as `my-skill/scripts/example.py`.
