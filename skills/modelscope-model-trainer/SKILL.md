@@ -97,6 +97,7 @@ The generated default datasets follow ms-swift-friendly schemas:
 - `DPO` and `GRPO` use `swift rlhf --rlhf_type dpo|grpo`.
 - Keep remote `user_command` short and deterministic.
 - Use `REMOTE_ASSET_PATHS` when local files must be visible inside PAI DLC.
+- If the user provides a local dataset path anywhere in the workspace or as an absolute path, `scripts/training_workspace.py` should automatically append it to `REMOTE_ASSET_PATHS` and rewrite the training dataset path to `./remote_assets/...`.
 - Never pretend a local path is available remotely without packaging or upload.
 
 ## Defaults And References

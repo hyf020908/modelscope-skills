@@ -157,6 +157,21 @@ def parse_env_file(path: Path) -> dict[str, str]:
     return data
 
 
+def csv_items(raw: str) -> list[str]:
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def join_csv_items(items: list[str]) -> str:
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        if not item or item in seen:
+            continue
+        ordered.append(item)
+        seen.add(item)
+    return ",".join(ordered)
+
+
 def write_env_file(path: Path, mapping: dict[str, str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [f"{key}={mapping.get(key, '')}" for key in mapping if key.upper() == key]
@@ -182,6 +197,46 @@ def sanitize_repo_base(model_id: str, method: str) -> str:
     return f"{slug or 'modelscope-run'}-{method}"
 
 
+def resolve_local_path(raw: str, root: Path) -> Path:
+    candidate = Path(raw).expanduser()
+    if candidate.is_absolute():
+        return candidate.resolve()
+    return (root / candidate).resolve()
+
+
+def path_in_repo(root: Path, item: Path) -> str:
+    try:
+        rel = item.resolve().relative_to(root.resolve())
+        return rel.as_posix()
+    except ValueError:
+        return item.name
+
+
+def looks_like_local_path(raw: str, root: Path) -> bool:
+    if not raw:
+        return False
+    if raw.startswith(("./", "../", "/", "~/")):
+        return True
+    return resolve_local_path(raw, root).exists()
+
+
+def keep_remote_asset_entry(entry: str, root: Path) -> bool:
+    if entry in {"data", "configs", "scripts"}:
+        return True
+    if looks_like_local_path(entry, root):
+        return resolve_local_path(entry, root).exists()
+    return True
+
+
+def map_dataset_for_remote(raw: str, root: Path) -> tuple[str, list[str], str]:
+    if not raw or not looks_like_local_path(raw, root):
+        return raw, [], ""
+    resolved = resolve_local_path(raw, root)
+    entry = raw if not Path(raw).expanduser().is_absolute() else str(resolved)
+    remote_path = f"./remote_assets/{path_in_repo(root, resolved)}"
+    return remote_path, [entry], str(resolved)
+
+
 def normalize_method(raw: str) -> str:
     text = raw.lower()
     if any(token in text for token in ["grpo", "rlhf", "强化学习", "reinforcement"]):
@@ -200,23 +255,51 @@ def detect_train_type(request: str) -> str:
     return "lora"
 
 
+def is_probable_repo_id(token: str) -> bool:
+    lowered = token.lower()
+    bad_suffixes = (
+        ".json",
+        ".jsonl",
+        ".csv",
+        ".tsv",
+        ".parquet",
+        ".txt",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+    )
+    return not lowered.endswith(bad_suffixes)
+
+
 def extract_repo_like(request: str, keywords: list[str]) -> str:
     lowered = request.lower()
-    repo_pat = re.compile(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_.-]+)?)")
+    repo_pat = re.compile(r"(?<![/.\w-])([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_.-]+)?)")
     for keyword in keywords:
         idx = lowered.find(keyword.lower())
         if idx == -1:
             continue
         snippet = request[idx : idx + 160]
         match = repo_pat.search(snippet)
-        if match:
+        if match and is_probable_repo_id(match.group(1)):
             return match.group(1)
+    return ""
+
+
+def extract_first_repo_like(request: str) -> str:
+    repo_pat = re.compile(r"(?<![/.\w-])([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_.-]+)?)")
+    for match in repo_pat.finditer(request):
+        token = match.group(1)
+        if is_probable_repo_id(token):
+            return token
     return ""
 
 
 def extract_path_like(request: str, keywords: list[str]) -> str:
     lowered = request.lower()
-    path_pat = re.compile(r"(\./[^\s,，;；]+|/[^\s,，;；]+)")
+    path_pat = re.compile(
+        r"(?:^|[\s'\"=：:])(?P<path>\./[^\s,，;；]+|\.\./[^\s,，;；]+|/[^\s,，;；]+|~/[^\s,，;；]+)"
+    )
     for keyword in keywords:
         idx = lowered.find(keyword.lower())
         if idx == -1:
@@ -224,8 +307,16 @@ def extract_path_like(request: str, keywords: list[str]) -> str:
         snippet = request[idx : idx + 160]
         match = path_pat.search(snippet)
         if match:
-            return match.group(1)
+            return match.group("path")
     return ""
+
+
+def extract_first_local_path(request: str) -> str:
+    path_pat = re.compile(
+        r"(?:^|[\s'\"=：:])(?P<path>\./[^\s,，;；]+|\.\./[^\s,，;；]+|/[^\s,，;；]+|~/[^\s,，;；]+)"
+    )
+    match = path_pat.search(request)
+    return match.group("path") if match else ""
 
 
 def extract_scalar_params(request: str) -> dict[str, str]:
@@ -358,7 +449,15 @@ def ensure_default_dataset(root: Path, method: str, force: bool) -> dict[str, An
     }
 
 
-def build_remote_env(existing: dict[str, str], repo_base: str) -> dict[str, str]:
+def build_remote_env(
+    existing: dict[str, str], repo_base: str, extra_asset_paths: list[str], root: Path
+) -> dict[str, str]:
+    remote_asset_paths = [
+        entry
+        for entry in csv_items(existing.get("REMOTE_ASSET_PATHS", "data,configs"))
+        if keep_remote_asset_entry(entry, root)
+    ]
+    remote_asset_paths.extend(extra_asset_paths)
     remote = {
         "ALIBABA_CLOUD_ACCESS_KEY_ID": existing.get("ALIBABA_CLOUD_ACCESS_KEY_ID", ""),
         "ALIBABA_CLOUD_ACCESS_KEY_SECRET": existing.get("ALIBABA_CLOUD_ACCESS_KEY_SECRET", ""),
@@ -378,7 +477,7 @@ def build_remote_env(existing: dict[str, str], repo_base: str) -> dict[str, str]
         "MS_REPO_OWNER": existing.get("MS_REPO_OWNER", ""),
         "MS_REPO_BASE": existing.get("MS_REPO_BASE", repo_base),
         "REMOTE_ASSET_REPO": existing.get("REMOTE_ASSET_REPO", ""),
-        "REMOTE_ASSET_PATHS": existing.get("REMOTE_ASSET_PATHS", "data,configs"),
+        "REMOTE_ASSET_PATHS": join_csv_items(remote_asset_paths),
         "REMOTE_BOOTSTRAP_COMMAND": existing.get(
             "REMOTE_BOOTSTRAP_COMMAND",
             'python -m pip install -U pip setuptools wheel && python -m pip install -U "modelscope>=1.23.0" "ms-swift>=3.8"',
@@ -406,15 +505,17 @@ def maybe_write_pai_gate(root: Path, remote_env: dict[str, str]) -> bool:
 def build_training_request(args: argparse.Namespace) -> dict[str, Any]:
     request = (args.request or "").strip()
     method = args.method or normalize_method(request)
-    model_id = args.model or extract_repo_like(
-        request, ["模型", "model", "base model", "基础模型", "使用"]
-    )
+    model_id = args.model or extract_repo_like(request, ["模型", "model", "base model", "基础模型"])
+    if not model_id:
+        model_id = extract_first_repo_like(request)
     if not model_id:
         model_id = DEFAULT_MODEL
 
     dataset = args.dataset or extract_repo_like(request, ["数据集", "dataset"])
     if not dataset:
         dataset = extract_path_like(request, ["数据集", "dataset", "训练集"])
+    if not dataset:
+        dataset = extract_first_local_path(request)
 
     params = METHOD_DEFAULTS[method].copy()
     params.update(extract_scalar_params(request))
@@ -485,9 +586,12 @@ def main() -> None:
     dataset = request_cfg["dataset"]
     valid_dataset = ""
     changed_files: list[str] = []
+    extra_asset_paths: list[str] = []
+    local_dataset_source = ""
 
     if dataset:
-        train_dataset = dataset
+        train_dataset, asset_paths, local_dataset_source = map_dataset_for_remote(dataset, root)
+        extra_asset_paths.extend(asset_paths)
     else:
         dataset_bootstrap = ensure_default_dataset(root, request_cfg["method"], force=args.force)
         changed_files.extend(dataset_bootstrap["changed_files"])
@@ -509,12 +613,15 @@ def main() -> None:
 
     existing_remote = parse_env_file(configs_dir / "remote.auto.env")
     repo_base = sanitize_repo_base(request_cfg["model_id"], request_cfg["method"])
-    remote_env = build_remote_env(existing_remote, repo_base)
+    remote_env = build_remote_env(existing_remote, repo_base, extra_asset_paths, root)
     write_env_file(configs_dir / "remote.auto.env", remote_env)
     gate_created = maybe_write_pai_gate(root, remote_env)
 
     plan_payload = {
         "request": request_cfg,
+        "local_dataset_source": local_dataset_source,
+        "remote_train_dataset": train_dataset,
+        "remote_asset_paths": csv_items(remote_env["REMOTE_ASSET_PATHS"]),
         "local_dataset_bootstrap": None
         if dataset_bootstrap is None
         else {
@@ -532,8 +639,10 @@ def main() -> None:
         "workspace_root": str(root),
         "method": request_cfg["method"],
         "model_id": request_cfg["model_id"],
+        "local_dataset_source": local_dataset_source,
         "train_dataset": train_dataset,
         "valid_dataset": valid_dataset,
+        "remote_asset_paths": csv_items(remote_env["REMOTE_ASSET_PATHS"]),
         "credential_gate_created": gate_created,
         "changed_files": changed_files,
         "generated_files": [

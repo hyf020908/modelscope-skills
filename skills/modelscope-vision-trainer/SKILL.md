@@ -73,6 +73,7 @@ The three task scripts output structured plans. They are not fake training comma
 
 - The local machine is the control plane only.
 - Use `REMOTE_ASSET_PATHS` when local scripts, configs, or data must be shipped to PAI DLC.
+- Local dataset directories, annotation files, and image roots should be appended to `REMOTE_ASSET_PATHS` automatically when the planner can resolve them.
 - Keep the remote job honest: if a real training script is missing, the result is a remote-ready package, not a completed training run.
 
 ## References
