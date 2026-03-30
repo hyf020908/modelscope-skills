@@ -251,7 +251,7 @@ def main() -> None:
     parser.add_argument("--request", default="", help="Natural-language training request")
     parser.add_argument("--root", default=".", help="Workspace root")
     parser.add_argument("--task", choices=["classification", "detection", "segmentation"], help="Override task")
-    parser.add_argument("--force", action="store_true", help="Reserved for compatibility")
+    parser.add_argument("--force", action="store_true", help="Overwrite generated placeholder files when applicable")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()

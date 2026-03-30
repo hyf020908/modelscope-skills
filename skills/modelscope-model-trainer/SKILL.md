@@ -30,7 +30,7 @@ Run `scripts/training_workspace.py` with the user's exact request text. That scr
 4. `configs/full.env`
 5. `configs/pai.required.env` when the four required PAI fields are still missing
 
-The compatibility entrypoint `scripts/bootstrap_remote_assets.py` now wraps the same workflow.
+You may also call `scripts/bootstrap_remote_assets.py` for the same preparation flow.
 
 ## Credential Gate
 
