@@ -85,6 +85,12 @@
       "source": "./skills/modelscope-vision-trainer",
       "skills": "./",
       "description": "Turn plain-language vision fine-tuning requests into task plans, config files, and PAI-ready submission assets."
+    },
+    {
+      "name": "modelscope-local-trainer",
+      "source": "./skills/modelscope-local-trainer",
+      "skills": "./",
+      "description": "Turn plain-language local-training requests into editable configs and launch scripts, then run them after the user fills a local config file and replies continue."
     }
   ]
 }

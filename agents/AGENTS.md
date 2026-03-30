@@ -9,6 +9,7 @@ These skills are:
  - modelscope-datasets -> "skills/modelscope-datasets/SKILL.md"
  - modelscope-evaluation -> "skills/modelscope-evaluation/SKILL.md"
  - modelscope-jobs -> "skills/modelscope-jobs/SKILL.md"
+ - modelscope-local-trainer -> "skills/modelscope-local-trainer/SKILL.md"
  - modelscope-mcp -> "skills/modelscope-mcp/SKILL.md"
  - modelscope-model-trainer -> "skills/modelscope-model-trainer/SKILL.md"
  - modelscope-paper-publisher -> "skills/modelscope-paper-publisher/SKILL.md"
@@ -27,6 +28,7 @@ modelscope-dataset-explorer: `Explore ModelScope datasets from plain-language in
 modelscope-datasets: `Build, clean, validate, and publish ModelScope datasets from plain-language instructions with automatic template selection.`
 modelscope-evaluation: `Turn plain-language evaluation requests into benchmark extraction, remote evaluation jobs, and publishable result artifacts.`
 modelscope-jobs: `Execute plain-language batch-job requests as reproducible local or PAI DLC workflows and publish the outputs to ModelScope.`
+modelscope-local-trainer: `Turn plain-language local-training requests into editable configs and launch scripts, then run them after the user fills a local config file and replies continue.`
 modelscope-mcp: `Configure the official ModelScope MCP server from plain-language setup requests and use it for tool-based Hub discovery.`
 modelscope-model-trainer: `Turn plain-language language-model training requests into ms-swift configs, PAI DLC jobs, and ModelScope publications with sensible defaults.`
 modelscope-paper-publisher: `Turn plain-language publication requests into evidence-backed Markdown reports for ModelScope repositories.`
